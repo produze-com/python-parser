@@ -1,0 +1,15 @@
+[package]
+name = "pythonparser"
+version = "0.1.0"
+authors = []
+edition = "2021"
+
+[lib]
+name = "pythonparser"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+rustler = { version = "0.36.1", default-features = false, features = ["derive", "nif_version_2_15"] }
+tree-sitter = "0.20"
+tree-sitter-python = "0.20"

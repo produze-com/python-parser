@@ -1,0 +1,3 @@
+[submodule "native/pythonparser/tree-sitter-python"]
+	path = native/pythonparser/tree-sitter-python
+	url = https://github.com/tree-sitter/tree-sitter-python.git
