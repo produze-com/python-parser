@@ -789,4 +789,365 @@ defmodule PythonParserTest do
              ]
            } = ast
   end
+
+  test "parses incomplete function definition" do
+    code = "def fn_name():"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "def fn_name():",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "function_definition",
+                 text: "def fn_name():",
+                 children: [
+                   %PythonParser.AstNode{kind: "def", text: "def", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "fn_name", children: []},
+                   %PythonParser.AstNode{
+                     kind: "parameters",
+                     text: "()",
+                     children: [
+                       %PythonParser.AstNode{kind: "(", text: "(", children: []},
+                       %PythonParser.AstNode{kind: ")", text: ")", children: []}
+                     ]
+                   },
+                   %PythonParser.AstNode{kind: ":", text: ":", children: []},
+                   %PythonParser.AstNode{kind: "block", text: "", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete function with partial return" do
+    code = """
+    def fn_name():
+        ret
+    """
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "def fn_name():\n    ret\n",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "function_definition",
+                 text: "def fn_name():\n    ret",
+                 children: [
+                   %PythonParser.AstNode{kind: "def", text: "def", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "fn_name", children: []},
+                   %PythonParser.AstNode{
+                     kind: "parameters",
+                     text: "()",
+                     children: [
+                       %PythonParser.AstNode{kind: "(", text: "(", children: []},
+                       %PythonParser.AstNode{kind: ")", text: ")", children: []}
+                     ]
+                   },
+                   %PythonParser.AstNode{kind: ":", text: ":", children: []},
+                   %PythonParser.AstNode{
+                     kind: "block",
+                     text: "ret",
+                     children: [
+                       %PythonParser.AstNode{
+                         kind: "expression_statement",
+                         text: "ret",
+                         children: [
+                           %PythonParser.AstNode{kind: "identifier", text: "ret", children: []}
+                         ]
+                       }
+                     ]
+                   }
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete function with partial return statement" do
+    code = """
+    def fn_name():
+        return
+    """
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "def fn_name():\n    return\n",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "function_definition",
+                 text: "def fn_name():\n    return",
+                 children: [
+                   %PythonParser.AstNode{kind: "def", text: "def", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "fn_name", children: []},
+                   %PythonParser.AstNode{
+                     kind: "parameters",
+                     text: "()",
+                     children: [
+                       %PythonParser.AstNode{kind: "(", text: "(", children: []},
+                       %PythonParser.AstNode{kind: ")", text: ")", children: []}
+                     ]
+                   },
+                   %PythonParser.AstNode{kind: ":", text: ":", children: []},
+                   %PythonParser.AstNode{
+                     kind: "block",
+                     text: "return",
+                     children: [
+                       %PythonParser.AstNode{
+                         kind: "return_statement",
+                         text: "return",
+                         children: [
+                           %PythonParser.AstNode{kind: "return", text: "return", children: []}
+                         ]
+                       }
+                     ]
+                   }
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses function with incomplete parameters" do
+    code = "def fn_name(param1,"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "def fn_name(param1,",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "def fn_name(param1,",
+                 children: [
+                   %PythonParser.AstNode{kind: "def", text: "def", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "fn_name", children: []},
+                   %PythonParser.AstNode{kind: "(", text: "(", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "param1", children: []},
+                   %PythonParser.AstNode{kind: ",", text: ",", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete if statement" do
+    code = "if condition"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "if condition",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "if condition",
+                 children: [
+                   %PythonParser.AstNode{kind: "if", text: "if", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "condition", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete string literal" do
+    code = "print(\"hello"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "print(\"hello",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "print(\"hello",
+                 children: [
+                   %PythonParser.AstNode{kind: "print", text: "print", children: []},
+                   %PythonParser.AstNode{kind: "(", text: "(", children: []},
+                   %PythonParser.AstNode{kind: "string_start", text: "\"", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "hello", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete dictionary" do
+    code = "data = {\"key\": "
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "data = {\"key\": ",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "data = {\"key\":",
+                 children: [
+                   %PythonParser.AstNode{kind: "identifier", text: "data", children: []},
+                   %PythonParser.AstNode{kind: "=", text: "=", children: []},
+                   %PythonParser.AstNode{kind: "{", text: "{", children: []},
+                   %PythonParser.AstNode{
+                     kind: "string",
+                     text: "\"key\"",
+                     children: [
+                       %PythonParser.AstNode{kind: "string_start", text: "\"", children: []},
+                       %PythonParser.AstNode{kind: "string_content", text: "key", children: []},
+                       %PythonParser.AstNode{kind: "string_end", text: "\"", children: []}
+                     ]
+                   },
+                   %PythonParser.AstNode{kind: ":", text: ":", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete list" do
+    code = "items = [1, 2,"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "items = [1, 2,",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "items = [1, 2,",
+                 children: [
+                   %PythonParser.AstNode{kind: "identifier", text: "items", children: []},
+                   %PythonParser.AstNode{kind: "=", text: "=", children: []},
+                   %PythonParser.AstNode{kind: "[", text: "[", children: []},
+                   %PythonParser.AstNode{kind: "integer", text: "1", children: []},
+                   %PythonParser.AstNode{kind: ",", text: ",", children: []},
+                   %PythonParser.AstNode{kind: "integer", text: "2", children: []},
+                   %PythonParser.AstNode{kind: ",", text: ",", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete class definition" do
+    code = "class MyClass"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "class MyClass",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "class MyClass",
+                 children: [
+                   %PythonParser.AstNode{kind: "class", text: "class", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "MyClass", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete for loop" do
+    code = "for item in"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "for item in",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "for item in",
+                 children: [
+                   %PythonParser.AstNode{kind: "for", text: "for", children: []},
+                   %PythonParser.AstNode{kind: "identifier", text: "item", children: []},
+                   %PythonParser.AstNode{kind: "in", text: "in", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete import statement" do
+    code = "import"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "import",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "import",
+                 children: [
+                   %PythonParser.AstNode{kind: "import", text: "import", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete try statement" do
+    code = "try:"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "try:",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "try:",
+                 children: [
+                   %PythonParser.AstNode{kind: "try", text: "try", children: []},
+                   %PythonParser.AstNode{kind: ":", text: ":", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
+
+  test "parses incomplete lambda expression" do
+    code = "lambda x:"
+
+    {:ok, ast} = PythonParser.parse(code)
+
+    assert %PythonParser.AstNode{
+             kind: "module",
+             text: "lambda x:",
+             children: [
+               %PythonParser.AstNode{
+                 kind: "ERROR",
+                 text: "lambda x:",
+                 children: [
+                   %PythonParser.AstNode{kind: "lambda", text: "lambda", children: []},
+                   %PythonParser.AstNode{
+                     kind: "lambda_parameters",
+                     text: "x",
+                     children: [
+                       %PythonParser.AstNode{kind: "identifier", text: "x", children: []}
+                     ]
+                   },
+                   %PythonParser.AstNode{kind: ":", text: ":", children: []}
+                 ]
+               }
+             ]
+           } = ast
+  end
 end
