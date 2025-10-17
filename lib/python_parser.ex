@@ -13,7 +13,8 @@ defmodule PythonParser do
     version: version,
     targets: [
       "aarch64-apple-darwin",
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu"
     ]
 
   defmodule AstNode do
